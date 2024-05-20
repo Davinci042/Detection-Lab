@@ -81,7 +81,23 @@ The Detection Lab project aimed to establish a controlled environment for simula
        
 9. Configure Splunk Universal Forwarder and Sysmon: For Brevity I will only describe the steps to install sysmon on one of the windows 10 VMs.
       1. First make sure you set-up static IP for the VM by going to the windows settings, internet & Network then properties and ipv4 settings and enter manual settings. Ensure the VMs are pointing to the ip address of the Active directory server as the primary DNS and use 8.8.8.8 as alternate DNS.
-      2. Head over to splunk.com and sign in.
-      3. Click on Products and then free trials and downloads. Scroll down and select Splunk Universal forwarder
+      2. From your windows VM, head over to splunk.com and sign in.
+      3. Click on Products and then free trials and downloads. Scroll down and select Universal forwarder. Click on get my free download and select the correct OS which in my case is Windows 10 64-bit.
+      4. Once the download is completed, go to downlads folder and double click the msi file. Click on check box to accept the license agreement. Select the first option that is on-premise splunk enterprise instance. Click on Next
+      5. Type username as admin and leave generate random password checked. Click Next.
+      6. Skip deployment server as we do not currently have one.
+      7. For receiving indexer this will be the Ip address of the splunk server which is 10.0.2.10 and use port 9997 which is the default port for receiving events for splunk. Hit Next
+      8. Hit Install.
+      9. Now we will start downloading and installing sysmon
+      10. Got o browser again and on new tab search sysmon. Select Sysmon by sysinyternals. Scroll down and click on download sysmon.
+      11. Search for sysmon configuration. I used sysmon by olaf. Search for sysmon olaf config and go to the github link. Scroll down and select sysmonconfig.xml. Click on raw on the right hand side, right click save as and save under downlaods directory.
+      12. Go to download directory and you will see the sysmon folder you downloaded from sysinternals. Right click on it and click on extract all. Click Extract.
+      13. Click on the file explorer bar and right click and copy the path
+      14. Open up powershell from start button and run as administrator.
+      15. Type cd paste file path
+      16. Type .\Sysmon64.exe -i ..\sysmonconfig.xml and hit Enter. Hit Agree on the pop up window and it will install sysmon. You will see a sysmon started message on the window. close powershell
+      17. Your splunk universal forwarder shpould have finished installing by now. Click on finish.
+      18. Next we need to instruct our splunk forwarder on what we want to send over to our splunk server by configuriong a file called inputs.conf This file is located under C:\ drive \Program files \ Splunk Universal forwarder \ etc\ system \ default.
+      19. Right click on this file and copy it. Go to ...\system\local directory and paste the inputs.conf file here. DO NOT EDIT THE INPUTS.CONF FILE UNDER THE DEFAULT DIRECTORY. The local directory requires administrative privileges. Open notepad as admin and paste the contents of inputs.conf from this  <a href="https://www.microsoft.com/en-ca/software-download/windows 10">repository</a>
 
 

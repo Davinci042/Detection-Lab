@@ -20,7 +20,8 @@ The Detection Lab project aimed to establish a controlled environment for simula
 1. This home lab set up needs to be first designed and I used a free online tool draw.io to accomplish this. The home network will be a 10.0.2.0/24 subnet and all VMs will be spun up in Oracle Virtualbox. Then I spun up a windows 2022 server VM that I promoted to the role of Domain Controller. Next I spun up an Ubuntu Linux VM that I where I installed Splunk server. The set up is designed so that all the VMs and Active Directory DC will forward telemetry to the Splunk server so we it can be indexed and searched using SPL queries. To achieve this I installed Sysmon and Splunk Universal forwarder on each of the assets that will send telemetry to Splunk.
 
 *Ref 1: Network Diagram*
-![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/49ced989-dd48-4f48-a15b-c82ddbb78fce)
+![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/aed6ddde-7990-41d6-aa98-02afad8a4bc6)
+
 
 2. Installing Virtual box
    1. Go to Virtualbox.org
@@ -63,7 +64,7 @@ The Detection Lab project aimed to establish a controlled environment for simula
    15. Head to Products and click on free trials and downloads. Scroll down to Splunk enterprise and select Linux as your operating system. We are interested in the .deb file, so go ahead and select Download now and save in directory of your choice.
    16. Go back to splunk VM and install the Guest add ons for virtualbox using the cmd sudo apt-get install virtualbox + tab (to see what options are available). We are interested in the guest-additions-iso. Type that out to complete the cmd and hit Enter. Type Y for Yes and hit Enter. Once you see a screen hit Enter
    17. Clear screen and on top click on devices. Head over to shared folders and click on shared folder settings. Now we want to add a folder by clicking on the + icon on the right side of the mini window. Select the folder path where the splunk installer is. Leave folder name as default and for options select read only, auto mount and make permanent. Hit Ok and hit Ok again.
-   18. Back unto the splunk VM type sudo reboot and hit Enter to reboot the bvirtual machine
+   18. Back unto the splunk VM type sudo reboot and hit Enter to reboot the virtual machine
    19. Log back in to Splunk with username and password.
    20. Add user to the vboxsf group. Type sudo adduser username vboxsf and hit Enter
    21. Type in the password.
@@ -73,14 +74,14 @@ The Detection Lab project aimed to establish a controlled environment for simula
    25. Now we want to mount our shared folder unto our directory called share by using the cmd sudo mount -t vboxsf -o uid=1000, gid=1000 sharedfoldername_from_step_17 and hit Enter. If you get error here, try exiting the session to log out and then log back in so that the new user you added can take effect.
    26. Change directories into that share folder cd share.
    27. Type ls -la to list out all the files in the share folder which should include the splunk installer.
-   28. To install splunk type sudo dpkg -i splunk_installer_filename. and hit Enter.
+   28. To install splunk type sudo dpkg -i splunk_installer_filename and hit Enter.
    29. Once you see complete you are good to change into the directory of where splunk is located on our server which should be cd /opt/splunk and hit Enter
    30. Type ls - la and hit Enter. You will notice that all of the users and groups belong to splunk as it limits the permissions to that user. Change into the user splunk by typing sudo -u splunk bash and hit Enter
    31. Change into bin directory cd bin (which contains all the binaries splunk can use) and hit Enter. Type ./splunk start and hit Enter to run the installer. You will get a license and terms agreement. Go ahead and hit Q and type in Y to accept. Enter an administrative username and enter a password.
    32. To make sure splunk starts up ebverytime our VM reboots. Type exit to go out of the user splunk. Change to bin directory cd bin. Type ./splunk enable boot-start -user splunk and hit Enter.
        
-9. Configure Splunk Universal Forwarder and Sysmon: For Brevity I will only describe the steps to install sysmon on one of the windows 10 VMs.
-      1. First make sure you set-up static IP for the VM by going to the windows settings, internet & Network then properties and ipv4 settings and enter manual settings. Ensure the VMs are pointing to the ip address of the Active directory server as the primary DNS and use 8.8.8.8 as alternate DNS.
+9. Configure Splunk Universal Forwarder and Sysmon: For Brevity I will only describe the steps to install sysmon on one of the windows 10 VMs named SPIDERMAN.
+      1. First make sure you set-up static IP for the VM by going to the windows settings, internet & Network then properties and ipv4 settings and enter manual settings i.e IP address of 10.0.2.30, subnet mask of 255.255.255.0 and default gateway of 10.0.2.1. Ensure the VMs are pointing to the primary DNS 8.8.8.8.
       2. From your windows VM, head over to splunk.com and sign in.
       3. Click on Products and then free trials and downloads. Scroll down and select Universal forwarder. Click on get my free download and select the correct OS which in my case is Windows 10 64-bit.
       4. Once the download is completed, go to downlads folder and double click the msi file. Click on check box to accept the license agreement. Select the first option that is on-premise splunk enterprise instance. Click on Next
@@ -96,8 +97,23 @@ The Detection Lab project aimed to establish a controlled environment for simula
       14. Open up powershell from start button and run as administrator.
       15. Type cd paste file path
       16. Type .\Sysmon64.exe -i ..\sysmonconfig.xml and hit Enter. Hit Agree on the pop up window and it will install sysmon. You will see a sysmon started message on the window. close powershell
+          ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/f793e178-9fad-4189-9082-9e294fe97fac)
+
       17. Your splunk universal forwarder shpould have finished installing by now. Click on finish.
       18. Next we need to instruct our splunk forwarder on what we want to send over to our splunk server by configuriong a file called inputs.conf This file is located under C:\ drive \Program files \ Splunk Universal forwarder \ etc\ system \ default.
-      19. Right click on this file and copy it. Go to ...\system\local directory and paste the inputs.conf file here. DO NOT EDIT THE INPUTS.CONF FILE UNDER THE DEFAULT DIRECTORY. The local directory requires administrative privileges. Open notepad as admin and paste the contents of inputs.conf from this  <a href="https://www.microsoft.com/en-ca/software-download/windows 10">repository</a>
+      19. Right click on this file and copy it. Go to ...\system\local directory and paste the inputs.conf file here. DO NOT EDIT THE INPUTS.CONF FILE UNDER THE DEFAULT DIRECTORY. The local directory requires administrative privileges. Open notepad as admin and paste the contents of inputs.conf from this  <a href="https://github.com/Davinci042/Splunk-Univ-Forwarder-inputs.conf">repository</a>. Note that we are forwarding Windows event logs from Application, Security, System and Sysmon/Operational. The index we are using is pointing to an index name called endpoint. This is important to know because whaever events we generate under these categories will only be sent to the index called endpoints in splunk. Save the notepad file under C:\Programfiles\SplunkUniversalForwarder\etc\system\local directory and use file names as inputs.conf and save as types as All files. Click on save and exit.
+      20. Anytime you update inputs.conf file you must restart splunk universal forwarder service. Search up services on windows search bar and run as administartor. Look for Splunk forwarder service. Under column of log on as double click on Log on asif it is NT SERVICE. Change to Local system account. Click on OK. Now log on as is now Local System. Right click on the Splunk Forwarder and click on restart. If you get error warning just hit OK. Now start the service again.
+      21. Now we can finalize our splunk configuration. Open a new splunk portal by typing on a brower address 10.0.2.10:8000 and hit Enter
+      22. Log in using credentials we created during the splunk install on the server.
+      23. From home screen select settings at the top and head over to indexes. You need to create the index endpoint just like we have in the inputs.conf file. Click on NEw Index button. Type name as endpoint and click on save.
+      24. Next we need to enable our splunk server to receiver the data. Click on setting, click on forwarding and receiving. Under the Receive data, click on configfure receiving, Click on new receiving port and put it as 9997 and hit save.
+      25. Click on Apps and select search and reporting. Skip tour. Type under the search bar index=endpoint and timeframe can be last 24 hours, then click on search. You should see some events come through. You can scroll down and you will see your VM name as the host sending the telemetry.
+      26. Now you can start building queries to look for malicious activity from the splunk environment.
+      27. We can follow the same steps to install sysmon and splunk universal forwarder on our Active directory Domain Controller server. The only thing to note is that when installing Splunk Universal forwarder on the AD server use the server IP address ad the deployment server address and use default port 8089.
+      28. After we have repeated the same process for all endpoints i.e the other windows VM named THE PUNISHER and our ADDC named HYDRA-DC, we should start seeing all 3 host when we search index=endpoint in splunk.
+          ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/fb60e3a1-f68d-43cf-85a7-4b730896e7d1)
+          ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/61da853b-e259-45b4-be6e-d7f9d22420a7)
+
+
 
 

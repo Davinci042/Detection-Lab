@@ -114,7 +114,7 @@ The Detection Lab project aimed to establish a controlled environment for simula
           ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/fb60e3a1-f68d-43cf-85a7-4b730896e7d1)
           ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/61da853b-e259-45b4-be6e-d7f9d22420a7)
 
-10. Sending telemetry using Kali Linux and Atomic Red team.
+10. Sending telemetry using Kali Linux.
       1. Log in to your Kali Linux machine and set up a static ip address of 10.0.2.7. You can do this by right clicking the ethernet icon and go to edit connections. Select wired connections and click on the cog icon at the bottom left. Then go to ipv4 tab and change method to manual. Click on add. Put in Ipv4 address, netmask of 24 and default gateway of 10.0.2.1. Put in DNS server of 8.8.8.8. Disconnect and connect back to wired connection and then verify our ip address with ipconfig command and also connectivity by pinging google.com
       2. Update and upgrade Kali linux using sudo apt get uprade -y
       3. Create a new directory in your Desktop folder using cmd mkdir AD-Project
@@ -126,11 +126,14 @@ The Detection Lab project aimed to establish a controlled environment for simula
       9. Add the password for your VMs manually into passwords.txt using nano password.txt to edit it and add the VM passwords to the bottom. Save by holding Ctrl + X and Type Y.
       10. On the windows target machine we will enable remote desktop. Go to settings and Advanced system settings. Put in Admin credentials. Click on remote tab and select Allow remote connections to this computer. Select Users and add 2 users, Peter Parker(pparker@marvel.local) and Frank Castle(fcastle@marvel.local). Click on Ok, Ok , Apply and Ok.
       11. Now lets launch our attack. Go back to kali linux machine and type crowbar -h. This will give you the list of cmds
-      12. Run the attack cmd crowbar -b rdp -u pparker -C password.txt -s 10.0.2.30/32 and hit Enter. You should get RDP success.
+      12. Run the attack cmd crowbar -b rdp -u pparker@marvel.local -C password.txt -s 10.0.2.30/32 and hit Enter. You should get RDP success.
           ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/0d020374-a1a4-4c8e-81ea-e75552d533cd)
 
       13. Go to Splunk to see what telemetry you generated. On the search bar type index=endpoint pparker and select time frame of last 15 minutes. Hit Enter. View Events and Event codes. Search the event codes you get on google to see what they mean.
           ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/017f6d7a-3b1c-4ab8-8f92-73f991984cc2)
+11. Finally we will send telemetry using Atomic Red Team.
+       1. On my Virtual Machine SPIDERMAN, Open Powershell on Administrator mode
+       2. Type the cmd
 
     
 

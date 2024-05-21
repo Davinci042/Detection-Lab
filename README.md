@@ -43,7 +43,7 @@ The Detection Lab project aimed to establish a controlled environment for simula
    10. Check the box skip unattended installation & click Next. On the next screens choose your VM compute settings Memory 4GB, CPU = 1, Virtual hard disk 50GB.
    
 4. Spin-up a Kali Linux VM. Download a pre-built Kali linux iso from Kali.org and install it on virtual box.
-5. Spin-up a Windows 2019 server VM on virtual box. First download the iso image file from microsoft evaluation center (I used google to look up and get the url). During the installation make sure to select Windows server 2022 desktop experience
+5. Spin-up a Windows 2022 server VM on virtual box. First download the iso image file from microsoft evaluation center (I used google to look up and get the url). During the installation make sure to select Windows server 2022 desktop experience. I went ahead to promote my server to Active Directory Domain Controller with Domain name HYDRA-DC. I domain joined my VMs to my AD domain and added two users Peter Parker and Frank Castle.
 6. Spin-up a splunk server. Go to ubuntu.com and download ubuntu server 22.04.3 to download the iso image file. During installation we make the splunk beefier because we expect it to collect telemetry data from other VMs so we set the Virtual hard disk size of 100GB. Start the Splunk server VM and follow the steps to install it.
 7. Go to virtual box and ensure that you configure a NAT network. Ensure all your VMs are on the same NAT network
 8. Configure Splunk
@@ -114,6 +114,21 @@ The Detection Lab project aimed to establish a controlled environment for simula
           ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/fb60e3a1-f68d-43cf-85a7-4b730896e7d1)
           ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/61da853b-e259-45b4-be6e-d7f9d22420a7)
 
+10. Sending telemetry using Kali Linux and Atomic Red team.
+      1. Log in to your Kali Linux machine and set up a static ip address of 10.0.2.7. You can do this by right clicking the ethernet icon and go to edit connections. Select wired connections and click on the cog icon at the bottom left. Then go to ipv4 tab and change method to manual. Click on add. Put in Ipv4 address, netmask of 24 and default gateway of 10.0.2.1. Put in DNS server of 8.8.8.8. Disconnect and connect back to wired connection and then verify our ip address with ipconfig command and also connectivity by pinging google.com
+      2. Update and upgrade Kali linux using sudo apt get uprade -y
+      3. Create a new directory in your Desktop folder using cmd mkdir AD-Project
+      4. We will use a tool called crowbar to perform brute force attacks on our other VMs. Use cmd sudo install -y crowbar. 
+      5. We want to use a popular wordlist for bruteforce called rockyou.txt. Change to directory with this file using cd /usr/share/wordlists
+      6. Unzip rockyou.txt.gz using the cmd sudo gunzip rockyoutxt.gz
+      7. Copy this file into AD project folder using cmd cp rockyou.txt ~/Desktop/AD-Project
+      8. Make a smaller password list so lets create a new password file with the first 20 lines in rockyou.txt using cmd head -n 20 rockyou.txt > passwords.txt
+      9. Add the password for your VMs manually into passwords.txt using nano password.txt to edit it and add the VM passwords to the bottom. Save by holding Ctrl + X and Type Y.
+      10. On the windows target machine we will enable remote desktop. Go to settings and Advanced system settings. Put in Admin credentials. Click on remote tab and select Allow remote connections to this computer. Select Users and add 2 users, Peter Parker(pparker@marvel.local) and Frank Castle(fcastle@marvel.local). Click on Ok, Ok , Apply and Ok.
+      11. Now lets launch our attack. Go back to kali linux machine and type crowbar -h. This will give you the list of cmds
+      12. Run the attack cmd crowbar -b rdp -u pparker -C password.txt -s 10.0.2.30/32 and hit Enter. You should get RDP success.
+      13. Go to Splunk to see what telemetry you generated. On the search bar type index=endpoint pparker and select time frame of last 15 minutes. Hit Enter. View Events and Event codes. Search the event codes you get on google to see what they mean.
+    
 
 
 

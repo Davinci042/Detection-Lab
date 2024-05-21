@@ -127,7 +127,11 @@ The Detection Lab project aimed to establish a controlled environment for simula
       10. On the windows target machine we will enable remote desktop. Go to settings and Advanced system settings. Put in Admin credentials. Click on remote tab and select Allow remote connections to this computer. Select Users and add 2 users, Peter Parker(pparker@marvel.local) and Frank Castle(fcastle@marvel.local). Click on Ok, Ok , Apply and Ok.
       11. Now lets launch our attack. Go back to kali linux machine and type crowbar -h. This will give you the list of cmds
       12. Run the attack cmd crowbar -b rdp -u pparker -C password.txt -s 10.0.2.30/32 and hit Enter. You should get RDP success.
+          ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/0d020374-a1a4-4c8e-81ea-e75552d533cd)
+
       13. Go to Splunk to see what telemetry you generated. On the search bar type index=endpoint pparker and select time frame of last 15 minutes. Hit Enter. View Events and Event codes. Search the event codes you get on google to see what they mean.
+          ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/017f6d7a-3b1c-4ab8-8f92-73f991984cc2)
+
     
 
 

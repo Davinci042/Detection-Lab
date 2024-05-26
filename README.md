@@ -97,6 +97,7 @@ The Detection Lab project aimed to establish a controlled environment for simula
       14. Open up powershell from start button and run as administrator.
       15. Type cd paste file path
       16. Type .\Sysmon64.exe -i ..\sysmonconfig.xml and hit Enter. Hit Agree on the pop up window and it will install sysmon. You will see a sysmon started message on the window. close powershell
+          *Ref 2: Successful installation of Sysmon*
           ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/f793e178-9fad-4189-9082-9e294fe97fac)
 
       17. Your splunk universal forwarder shpould have finished installing by now. Click on finish.
@@ -111,10 +112,11 @@ The Detection Lab project aimed to establish a controlled environment for simula
       26. Now you can start building queries to look for malicious activity from the splunk environment.
       27. We can follow the same steps to install sysmon and splunk universal forwarder on our Active directory Domain Controller server. The only thing to note is that when installing Splunk Universal forwarder on the AD server use the server IP address ad the deployment server address and use default port 8089.
       28. After we have repeated the same process for all endpoints i.e the other windows VM named THE PUNISHER and our ADDC named HYDRA-DC, we should start seeing all 3 host when we search index=endpoint in splunk.
+          *Ref 4 & 5: Splunk screen showing all host sending telemetry*
           ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/fb60e3a1-f68d-43cf-85a7-4b730896e7d1)
           ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/61da853b-e259-45b4-be6e-d7f9d22420a7)
 
-10. Sending telemetry using Kali Linux.
+10. Simulate brute force attack on network and capture telemetry on Splunk.
       1. Log in to your Kali Linux machine and set up a static ip address of 10.0.2.7. You can do this by right clicking the ethernet icon and go to edit connections. Select wired connections and click on the cog icon at the bottom left. Then go to ipv4 tab and change method to manual. Click on add. Put in Ipv4 address, netmask of 24 and default gateway of 10.0.2.1. Put in DNS server of 8.8.8.8. Disconnect and connect back to wired connection and then verify our ip address with ipconfig command and also connectivity by pinging google.com
       2. Update and upgrade Kali linux using sudo apt get uprade -y
       3. Create a new directory in your Desktop folder using cmd mkdir AD-Project
@@ -127,13 +129,27 @@ The Detection Lab project aimed to establish a controlled environment for simula
       10. On the windows target machine we will enable remote desktop. Go to settings and Advanced system settings. Put in Admin credentials. Click on remote tab and select Allow remote connections to this computer. Select Users and add 2 users, Peter Parker(pparker@marvel.local) and Frank Castle(fcastle@marvel.local). Click on Ok, Ok , Apply and Ok.
       11. Now lets launch our attack. Go back to kali linux machine and type crowbar -h. This will give you the list of cmds
       12. Run the attack cmd crowbar -b rdp -u pparker@marvel.local -C password.txt -s 10.0.2.30/32 and hit Enter. You should get RDP success.
+          *Ref 6: Attack machine screen showing brute force success*
           ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/0d020374-a1a4-4c8e-81ea-e75552d533cd)
 
       13. Go to Splunk to see what telemetry you generated. On the search bar type index=endpoint pparker and select time frame of last 15 minutes. Hit Enter. View Events and Event codes. Search the event codes you get on google to see what they mean.
+          *Ref 7: Splunk screen showing captured brute forced authentication*
           ![image](https://github.com/Davinci042/Detection-Lab/assets/103445073/017f6d7a-3b1c-4ab8-8f92-73f991984cc2)
+
+          
 11. Finally we will send telemetry using Atomic Red Team.
-       1. On my Virtual Machine SPIDERMAN, Open Powershell on Administrator mode
-       2. Type the cmd
+       1. On my Virtual Machine SPIDERMAN, Open Powershell on Administrator mode and sign in using admin credentials.
+       2. Run the following cmd Set-ExecutionPolicy Bypass CurrentUser + Enter
+       3. Type in Y and hit Enter
+       4. Set an exclusion on the entire C:/ Drive so that MS defender will not automatically remove some of the files on Atomic red team. Go to Windows security from search bar on desktop and click on Virus & threat protection. Click on manage settings then scrool down and under Exclusion. Click on add or remove exclusion. Click on add an exclusion. Select Folder, Select this PC and scroll down again and select C:/ Drive and click on select folder on bottom of the window. Log in again as administrator and you will see an exclusion for your C:/ drive.
+       5. Now you can install atomic red team (ART). Go to your cmd prompt again and run the following cmd: Install-AtomicRedTeam -getAtomics + Enter
+       6. Press Y to install dependencies
+       7. Once ART is completed , head over to the C drive and click under the dir AtomicRedTeam. Click on the folder atomics where you will see a bunch of technique IDs which map back to the MITRE ATT&CK framework.
+       8. Let us test one MITRE ATT&CK technique id. We will try and test a Persistence tactics to create an account. This is T1136.001 for creating a local account. We have this option in our atomics folder so we would use this technique.
+       9. Go back to cmd prompt and typoe in the cmd: Invoke=AtomicTest T1136.001 + Enter. This will generate telemetry based on creating a local account. Note user name created.
+       10. Go to Splunk enterprise app and search for index=endpoint NewlocalUser. If you do not get any results it may mean you are blind to that technique. This can help you close gaps in your SOC.
+   
+### *THAT IS THE END OF THIS PROJECT SCOPE. THANKS FOR FOLLOWING TO THE END*
 
     
 
